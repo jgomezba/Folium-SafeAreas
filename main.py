@@ -2,7 +2,16 @@ import folium
 from geopy.distance import geodesic
 import os
 
-def get_all_list_cominations(lst:list):
+def get_all_list_cominations(lst:list)->list:
+    """Function to get all combinations 
+    (in pairs) from a list given.
+
+    Args:
+        lst (list): original list
+
+    Returns:
+        list: list of lists with possible cominations
+    """
     pairs = []
     for i in range(len(lst)):
         for j in range(len(lst)):
@@ -10,8 +19,22 @@ def get_all_list_cominations(lst:list):
                 pairs.append([lst[i],lst[j]])
     return pairs
 
-def plot_homes_security(map:folium.Map, home_locs:list, robbery_cent:list, dang_radius,
-        safe_col, dang_col):
+def plot_homes_security(map:folium.Map, home_locs:list, robbery_cent:list, dang_radius:int,
+        safe_col, dang_col)->folium.Map:
+    """This function plots homes in map depending if
+    they are in a safe or dangerous zone
+
+    Args:
+        map (folium.Map): map to draw
+        home_locs (list): locations of homes
+        robbery_cent (list): center of robberies
+        dang_radius (int): distance of danger
+        safe_col (_type_): color of safe zone
+        dang_col (_type_): color of danger zone
+
+    Returns:
+        folium.Map: map with homes included
+    """
     
     if safe_col == None:
         safe_col = "green"
@@ -28,8 +51,24 @@ def plot_homes_security(map:folium.Map, home_locs:list, robbery_cent:list, dang_
     
     return map
 
-def plot_danger_zone(map:folium.Map, robbery_loc, robbery_cent:list,danger_col,
-        border_radius_col, fill_radius_col, dang_radius):
+def plot_danger_zone(map:folium.Map, robbery_loc:list, robbery_cent:list,danger_col,
+        border_radius_col, fill_radius_col, dang_radius:int) -> folium.Map:
+    """This functions plots in a folium map danger zones with
+    an specified icon and calculates a radius of danger and every 
+    arist of every robbery location to measure thief trayectory.
+
+    Args:
+        map (folium.Map): map to draw
+        robbery_loc (list): contains robbery locations
+        robbery_cent (list): contains center of robbery locations
+        danger_col (_type_): danger color
+        border_radius_col (_type_): border color of danger circle 
+        fill_radius_col (_type_): fill color of danger circle
+        dang_radius (int): danger distance
+
+    Returns:
+        folium.Map: map with danger circle zone and lines added
+    """
     
     if danger_col == None:
         danger_col = 'red'
@@ -50,13 +89,23 @@ def plot_danger_zone(map:folium.Map, robbery_loc, robbery_cent:list,danger_col,
         ).add_to(map)
 
     #Create lines joining markers, but add first item again
-    #robbery_loc.append(robbery_loc[0])
     folium.PolyLine(locations=get_all_list_cominations(robbery_loc), color=danger_col, weight=2, opacity=0.7,).add_to(map)
     
     return map
 
 
 def plot_robbery_markers(map:folium.Map, robbery_locs:list, street_locs):
+    """This functions plots in a folium map robbery zones with
+    markers associated
+
+    Args:
+        map (folium.Map): map to draw
+        robbery_locs (list): robbery locations
+        street_locs (_type_): street names of locations
+
+    Returns:
+        folium.Map: map with danger zones added
+    """
     i=0
     for location in robbery_locs:
         icon_robbery = folium.features.CustomIcon('./images/thief_3.png', icon_size=(50,50))
@@ -72,10 +121,10 @@ def plot_robbery_markers(map:folium.Map, robbery_locs:list, street_locs):
     return map
 
 
-def plot_save_home_from_robbery(robbery_locations:list, home_locations:list, danger_radius:int, 
+def plot_safe_home_from_robbery(robbery_locations:list, home_locations:list, danger_radius:int, 
         map_zoom:float = 14, border_radius_color:str = None, fill_radius_color:str = None, 
         street_names:list = None, safe_color:str = None, danger_color:str = None):
-    
+
     #calculate mean point of robbery markers
     mean_lat = sum([pos[0] for pos in robbery_locations]) / len(robbery_locations)
     mean_lon = sum([pos[1] for pos in robbery_locations]) / len(robbery_locations)
@@ -104,7 +153,7 @@ def plot_save_home_from_robbery(robbery_locations:list, home_locations:list, dan
 if __name__ == "__main__":
 
     #Alcorcon last robbery locations
-    location_markers = [[40.350700, -3.819300],
+    robbery_locations = [[40.350700, -3.819300],
                         [40.3493175, -3.8061377],
                         [40.3452728, -3.8247379],
                         [40.3386008, -3.8107881],
@@ -123,5 +172,5 @@ if __name__ == "__main__":
                     [40.35098695,-3.8051485610200046]]
 
     #plot to html
-    plot_save_home_from_robbery(location_markers, home_locations,danger_radius= 950,
-        street_names=street_names)
+    plot_safe_home_from_robbery(robbery_locations, home_locations,
+            danger_radius= 950, street_names=street_names)
